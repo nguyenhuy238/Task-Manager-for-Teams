@@ -9,6 +9,7 @@
       "TaskManager/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
+          "MaterialDesignColors": "5.2.1",
           "MaterialDesignThemes": "5.2.1",
           "Microsoft.EntityFrameworkCore.Design": "8.0.8",
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.8",
