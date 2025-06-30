@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TaskManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskManager
 {
@@ -19,9 +21,106 @@ namespace TaskManager
     /// </summary>
     public partial class AdminView : UserControl
     {
+        private readonly TaskManagerDb1Context _context = new();
         public AdminView()
         {
+            
             InitializeComponent();
+            LoadUsers();
+            LoadProjects();
+            LoadPayroll();
+            GenerateReport();
+        }
+        private void LoadUsers()
+        {
+            var users = _context.Users.ToList();
+            UsersDataGrid.ItemsSource = users;
+        }
+
+        private void LoadProjects()
+        {
+            var projects = _context.Projects.ToList();
+            ProjectsDataGrid.ItemsSource = projects;
+        }
+
+        private void LoadPayroll()
+        {
+            var payroll = _context.Payrolls.Where(p => (bool)!p.Approved).ToList();
+            PayrollDataGrid.ItemsSource = payroll;
+        }
+
+        private void GenerateReport()
+        {
+            var totalUsers = _context.Users.Count();
+            var totalTasks = _context.Tasks.Count();
+            var completedTasks = _context.Tasks.Count(t => t.Status == "Done");
+            var progress = totalTasks > 0 ? (double)completedTasks / totalTasks * 100 : 0;
+            ReportTextBlock.Text = $"Report (as of {DateTime.Now}): {totalUsers} users, {totalTasks} tasks, {progress:F2}% completed";
+        }
+
+        private void AddUser_Click(object sender, RoutedEventArgs e)
+        {
+            var newUser = new User
+            {
+                Username = "newuser",
+                PasswordHash = "hashedpassword", // Cần mã hóa thực tế
+                Email = "newuser@example.com",
+                FullName = "New User",
+                Role = "TeamMember",
+                BaseSalary = 1000.00m
+            };
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+            LoadUsers();
+            MessageBox.Show("User added successfully!");
+        }
+
+        private void EditUser_Click(object sender, RoutedEventArgs e)
+        {
+            var user = UsersDataGrid.SelectedItem as User;
+            if (user != null)
+            {
+                // Giả lập chỉnh sửa (thực tế cần dialog hoặc form)
+                user.FullName = "Edited " + user.FullName;
+                _context.SaveChanges();
+                LoadUsers();
+                MessageBox.Show("User edited successfully!");
+            }
+            else
+            {
+                MessageBox.Show("Please select a user to edit.");
+            }
+        }
+
+        private void DeleteUser_Click(object sender, RoutedEventArgs e)
+        {
+            var user = UsersDataGrid.SelectedItem as User;
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                _context.SaveChanges();
+                LoadUsers();
+                MessageBox.Show("User deleted successfully!");
+            }
+            else
+            {
+                MessageBox.Show("Please select a user to delete.");
+            }
+        }
+
+        private void ApprovePayroll_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var payroll = button?.DataContext as Payroll;
+            if (payroll != null)
+            {
+                payroll.Approved = true;
+                payroll.ApprovedBy = 1; // Giả lập Admin ID
+                payroll.ApprovedAt = DateTime.Now;
+                _context.SaveChanges();
+                LoadPayroll();
+                MessageBox.Show("Payroll approved successfully!");
+            }
         }
     }
 }
