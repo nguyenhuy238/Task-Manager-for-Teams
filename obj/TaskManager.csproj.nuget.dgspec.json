@@ -55,10 +55,6 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
-            "MaterialDesignColors": {
-              "target": "Package",
-              "version": "[5.2.1, )"
-            },
             "MaterialDesignThemes": {
               "target": "Package",
               "version": "[5.2.1, )"
